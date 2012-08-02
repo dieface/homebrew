@@ -2,8 +2,8 @@ require 'formula'
 
 class Fontforge < Formula
   homepage 'http://fontforge.sourceforge.net'
-  url 'http://downloads.sourceforge.net/project/fontforge/fontforge-source/fontforge_full-20120731.tar.bz2'
-  sha1 'b44548813d937d41dd7c1005dadd86cf7339f530'
+  url 'http://downloads.sourceforge.net/project/fontforge/fontforge-source/fontforge_full-20120731-b.tar.bz2'
+  sha1 'b520f532b48e557c177dffa29120225066cc4e84'
 
   head 'git://fontforge.git.sourceforge.net/gitroot/fontforge/fontforge'
 
@@ -20,11 +20,6 @@ class Fontforge < Formula
   fails_with :llvm do
     build 2336
     cause "Compiling cvexportdlg.c fails with error: initializer element is not constant"
-  end
-
-  # Fixes compiler error
-  def patches
-    DATA
   end
 
   def install
@@ -111,14 +106,3 @@ class Fontforge < Formula
     return s
   end
 end
-
-__END__
-diff --git a/fontforge/libffstamp.h b/fontforge/libffstamp.h
-index 0b6193e..1822d38 100644
---- a/fontforge/libffstamp.h
-+++ b/fontforge/libffstamp.h
-@@ -1,3 +1,3 @@
- #define LibFF_ModTime		1343746639L	/* Seconds since 1970 (standard unix time) */
- #define LibFF_ModTime_Str	"14:57 GMT 31-Jul-2012"
--#define LibFF_VersionDate	"20120731"
-+#define LibFF_VersionDate	20120731
