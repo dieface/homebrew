@@ -2,8 +2,8 @@ require 'formula'
 
 class Fontforge < Formula
   homepage 'http://fontforge.sourceforge.net'
-  url 'http://downloads.sourceforge.net/project/fontforge/fontforge-source/fontforge_full-20110222.tar.bz2'
-  md5 '5be4dda345b5d73a27cc399df96e463a'
+  url 'http://downloads.sourceforge.net/project/fontforge/fontforge-source/fontforge_full-20120731.tar.bz2'
+  sha1 'b44548813d937d41dd7c1005dadd86cf7339f530'
 
   head 'git://fontforge.git.sourceforge.net/gitroot/fontforge/fontforge'
 
@@ -20,6 +20,11 @@ class Fontforge < Formula
   fails_with :llvm do
     build 2336
     cause "Compiling cvexportdlg.c fails with error: initializer element is not constant"
+  end
+
+  # Fixes compiler error
+  def patches
+    DATA
   end
 
   def install
@@ -44,6 +49,11 @@ class Fontforge < Formula
     # Reset ARCHFLAGS to match how we build
     ENV["ARCHFLAGS"] = MacOS.prefer_64_bit? ? "-arch x86_64" : "-arch i386"
 
+    if MacOS::Xcode.version >= "4.4"
+      lion_prefix = File.join(MacOS::Xcode.prefix, "Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk")
+      ENV.append "CFLAGS", "-isysroot " + lion_prefix
+    end
+
     system "./configure", *args
 
     # Fix hard-coded install locations that don't respect the target bindir
@@ -61,7 +71,12 @@ class Fontforge < Formula
     # Fix hard-coded include file paths. Reported usptream:
     # http://sourceforge.net/mailarchive/forum.php?thread_name=C1A32103-A62D-468B-AD8A-A8E0E7126AA5%40smparkes.net&forum_name=fontforge-devel
     # https://trac.macports.org/ticket/33284
-    header_prefix = MacOS::Xcode.prefix
+    if MacOS::Xcode.version >= "4.4"
+      header_prefix = File.join(lion_prefix, "Developer")
+    else
+      header_prefix = MacOS::Xcode.prefix
+    end
+
     inreplace %w(fontforge/macbinary.c fontforge/startui.c gutils/giomime.c) do |s|
       s.gsub! "/Developer", header_prefix
     end
@@ -96,3 +111,14 @@ class Fontforge < Formula
     return s
   end
 end
+
+__END__
+diff --git a/fontforge/libffstamp.h b/fontforge/libffstamp.h
+index 0b6193e..1822d38 100644
+--- a/fontforge/libffstamp.h
++++ b/fontforge/libffstamp.h
+@@ -1,3 +1,3 @@
+ #define LibFF_ModTime		1343746639L	/* Seconds since 1970 (standard unix time) */
+ #define LibFF_ModTime_Str	"14:57 GMT 31-Jul-2012"
+-#define LibFF_VersionDate	"20120731"
++#define LibFF_VersionDate	20120731
